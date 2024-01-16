@@ -1,4 +1,4 @@
-export default questions = {
+const questions = {
     q1:{
         questionTitle:"Commonly used data types DO Not include:",
         choices:["1. strings","2. booleans","3. alerts","4. numbers"],
