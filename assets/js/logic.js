@@ -9,24 +9,29 @@
 
 
 var startBtn = document.getElementById("start");
-var timeEl = document.getElementById("time");
-var questionsEl = document.getElementById("questions");
-var questionTitle = document.getElementById("question-title");
-var choices = document.getElementById("choices");
+var timerEl = document.getElementById("time");
+var startScreenEl = document.getElementById ("start-screen");
+var questionsScreen = document.getElementById("questions");
+var questionTitleEl = document.getElementById("question-title");
+var choicesEl = document.getElementById("choices");
 var feedbackEl = document.getElementById("feedback");
 var correctSound = new Audio("../sfx/correct.wav");
 var incorrectSound = new Audio("../sfx/incorrect.wav");
 var endScreenEl = document.getElementById ("end-screen");
-var startScreenEl = document.getElementById ("start-screen");
+
+var currentQuestionsIndex =0;
 var questionNumber =0;
 
 
+var timerInterval; 
+var timeLeft;
+var finalScore =document.getElementById("final-score");
 
-startBtn.addEventListener('click',function(event){
+startBtn.addEventListener('click',function(){
      // Hide the start screen
     startScreenEl.classList.add("hide");
     // Display questions screen
-    questionsEl.classList.remove("hide");
+    questionsScreen.classList.remove("hide");
     createOptionButton();
       // Call the startQuiz function
     startQuiz();
@@ -34,17 +39,26 @@ startBtn.addEventListener('click',function(event){
 });
 
 
-var timerInterval; 
-var timeLeft;
+
+document.getElementById('start').addEventListener('click', function() {
+    correctAudio.play();
+});
+
 // each question x25 sec; or simply input the number of seconds
-var time = questions.length *25;
+var timeLeft = 100;
 
 function startQuiz() {
-  timerInterval = setInterval(() => {
-    time--;
-    timeEl.textContent = time;
-    if (time <= 0) {
-      endQuiz()
+    timeLeft = 100;
+    timerInterval = setInterval(() => {
+    if (timeLeft > 1) {
+        // Set the `textContent` of `timerEl` to show the remaining seconds
+        timerEl.textContent = timeLeft;
+        // Decrement `timeLeft` by 1
+        timeLeft--;
+    } else {
+        // Once `timeLeft` gets to 0, set `timerEl` to an empty string
+        timerEl.textContent = 'time up';
+        endQuiz();
     }
   },1000);
 
@@ -71,22 +85,22 @@ function createOptionButton() {
     // Logging the selected buttons to the console for debugging
     console.log(choiceButtonEl, "button");
     // Removing the 'hide' class from the feedbackAlert element, making it visible
-    feedbackAlert.classList.remove('hide');
+    feedbackEl.classList.remove('hide');
 }
 
 // Function to display the current question and choices on the screen
 function displayQuestions() {
     // Retrieve the current question from the quizQuestions array based on the current index (i)
-    currentQuestionIndex = quizQuestions[questionNumber];
+    currentQuestionsIndex = quizQuestions[questionNumber];
     // Update the text content of the question title element 
     // to display the current question number and title
     questionTitleEl.textContent = `Question ${questionNumber + 1}: ${currentQuestionIndex["question-title"]}`;
     console.log(`Question ${questionNumber + 1}: ${currentQuestionIndex["question-title"]}`);
     // Iterate through the choices for the current question
-    for (let j = 0; j < currentQuestionIndex.choices.length; j++) {
+    for (let j = 0; j < currentQuestionsIndex.choices.length; j++) {
         // Set the text content of each choice button to display the corresponding choice 
         // for the current question
-        choiceButtonEl[j].textContent = currentQuestionIndex.choices[j];
+        choiceButtonEl[j].textContent = currentQuestionsIndex.choices[j];
     }
 }
 
@@ -111,10 +125,10 @@ function buttonsEventList(event) {
     } else {
         // If incorrect, subtract 5 seconds from the timer and display a wrong answer message
         timeLeft -= 5;
-        feedbackAlert.textContent = "Your answer is wrong!";
+        feedbackEl.textContent = "Your answer is wrong!";
         incorrectAudio.play();
         setTimeout(function(){
-            feedbackAlert.textContent = ""
+            feedbackEl.textContent = ""
             moveToNextQuestion();
         }, 1000)
         // clearTimeout(choiceTimeout)
@@ -137,9 +151,50 @@ function moveToNextQuestion() {
 }
 
 function endQuiz(){
-  clearInterval (timerInterval);
-  questionsEl.setAttribute ("class","hide");
-  endScreenEl.removeAttribute ("class");
+    displayScore();
+    clearInterval (timerInterval);
+    questionsScreen.setAttribute ("class","hide");
+    endScreenEl.removeAttribute ("class");
+    feedbackEl.setAttribute ("class", "hide");
 }
-startBtn.onclick = startQuiz;
+
+function displayScore() {
+    if (endQuiz) {
+        // Add textContent to span final-score from the timeLeft
+        finalScore.textContent = timeLeft;
+    }
+}
+
+// Create eventListener for submit button on the end-screen 
+// Select button element from end-screen and store it in a variable 
+let submitBtn = document.querySelector("#submit");
+// Initialize an empty array to store highscores
+let  highscoresArray = [];
+// Add eventListener to submitBtn 
+submitBtn.addEventListener('click', function(event) {
+    // use preventDefault to prevent dafault submit and just save to localStorage
+    event.preventDefault();
+      // Get the value of the initials input field
+      let initials = document.querySelector("#initials").value;
+        // Update the content of the finalScore element 
+        finalScore.textContent = timeLeft;
+        // Create a highscores object with initials and score
+        highscores = { initials: initials, score: timeLeft };
+        // Retrieve highscores from localStorage and parse it
+        let highScoresLocStor = JSON.parse(localStorage.getItem('highscores'));
+        // Check if there are existing highscores in localStorage
+        if (highScoresLocStor === null) {
+            // If no existing highscores, push the current highscores to the array 
+            // and save to localStorage
+            highscoresArray.push(highscores);
+            localStorage.setItem('highscores', JSON.stringify(highscoresArray));
+        } else {
+            // If there are existing highscores, push the current highscores 
+            //to the array and save to localStorage
+            highScoresLocStor.push(highscores);
+            localStorage.setItem('highscores', JSON.stringify(highScoresLocStor));
+        }
+    // Redirect the user to the 'highscores.html' page
+    location.href = 'highscores.html'
+});
 
