@@ -9,15 +9,17 @@
 
 
 var startBtn = document.getElementById("start");
-var timerEl = document.getElementById("time");
-var startScreenEl = document.getElementById ("start-screen");
+var time = document.getElementById("time");
+var startScreen = document.getElementById ("start-screen");
+var endScreen = document.getElementById ("end-screen");
 var questionsScreen = document.getElementById("questions");
 var questionTitleEl = document.getElementById("question-title");
-var choicesEl = document.getElementById("choices");
-var feedbackEl = document.getElementById("feedback");
+var choicesButtonEl = document.getElementById("choices");
+var feedbackAlert = document.getElementById("feedback");
+
 var correctSound = new Audio("../sfx/correct.wav");
 var incorrectSound = new Audio("../sfx/incorrect.wav");
-var endScreenEl = document.getElementById ("end-screen");
+
 
 var currentQuestionsIndex =0;
 var questionNumber =0;
@@ -27,44 +29,36 @@ var timerInterval;
 var timeLeft;
 var finalScore =document.getElementById("final-score");
 
-startBtn.addEventListener('click',function(){
+startBtn.addEventListener("click", function () {
      // Hide the start screen
-    startScreenEl.classList.add("hide");
-    // Display questions screen
+    startScreen.classList.add("hide");
+    // Display questions scree
     questionsScreen.classList.remove("hide");
     createOptionButton();
       // Call the startQuiz function
     startQuiz();
     displayQuestions();
-});
+})
 
-
-
-document.getElementById('start').addEventListener('click', function() {
+document.getElementById("start").addEventListener("click", function (event) {
     correctAudio.play();
-});
-
-// each question x25 sec; or simply input the number of seconds
-var timeLeft = 100;
-
-function startQuiz() {
+  });
+  function startQuiz() {
     timeLeft = 100;
     timerInterval = setInterval(() => {
     if (timeLeft > 1) {
         // Set the `textContent` of `timerEl` to show the remaining seconds
-        timerEl.textContent = timeLeft;
+        time.textContent = timeLeft;
         // Decrement `timeLeft` by 1
         timeLeft--;
     } else {
         // Once `timeLeft` gets to 0, set `timerEl` to an empty string
-        timerEl.textContent = 'time up';
+        time.textContent = 'time up';
         endQuiz();
     }
   },1000);
 
 }
-
-// Function to create option buttons
 function createOptionButton() {
     // Selecting the parent element where the buttons will be added
     let choicesDiv = document.getElementById("choices");
@@ -77,33 +71,35 @@ function createOptionButton() {
         choicesDiv.appendChild(button);
     }
     // Selecting all the created buttons with the "choices-button" class
-    choiceButtonEl = document.querySelectorAll('.choices-button');
+    choicesButtonEl = document.querySelectorAll('.choices-button');
     // Adding a click event listener to each button and linking it to the 'buttonsEventList' function
-    for (let i = 0; i < choiceButtonEl.length; i++) {
-        choiceButtonEl[i].addEventListener('click', buttonsEventList);
+    for (let i = 0; i < choicesButtonEl.length; i++) {
+        choicesButtonEl[i].addEventListener('click', buttonsEventList);
     }
     // Logging the selected buttons to the console for debugging
-    console.log(choiceButtonEl, "button");
+    console.log(choicesButtonEl, "button");
     // Removing the 'hide' class from the feedbackAlert element, making it visible
     feedbackEl.classList.remove('hide');
 }
 
-// Function to display the current question and choices on the screen
+
+
+}
+
 function displayQuestions() {
     // Retrieve the current question from the quizQuestions array based on the current index (i)
     currentQuestionsIndex = quizQuestions[questionNumber];
     // Update the text content of the question title element 
     // to display the current question number and title
-    questionTitleEl.textContent = `Question ${questionNumber + 1}: ${currentQuestionIndex["question-title"]}`;
-    console.log(`Question ${questionNumber + 1}: ${currentQuestionIndex["question-title"]}`);
+    questionTitleEl.textContent = `Question ${questionNumber + 1}: ${currentQuestionsIndex["question-title"]}`;
+    console.log(`Question ${questionNumber + 1}: ${currentQuestionsIndex["question-title"]}`);
     // Iterate through the choices for the current question
     for (let j = 0; j < currentQuestionsIndex.choices.length; j++) {
         // Set the text content of each choice button to display the corresponding choice 
         // for the current question
-        choiceButtonEl[j].textContent = currentQuestionsIndex.choices[j];
+        choicesButtonEl[j].textContent = currentQuestionsIndex.choices[j];
     }
 }
-
 function buttonsEventList(event) {
     // Log the text content of the clicked button to the console
     console.log(event.target.textContent);
@@ -114,7 +110,7 @@ function buttonsEventList(event) {
     // Check if the selected choice matches the correct answer for the current question
     if (selectedChoice === currentQuestion.answer) {
         // If correct, display a correct answer message in the feedback alert
-        feedbackAlert.textContent = "Your answer is correct!";
+        feedbackAlert.textContent = "correct!";
         correctAudio.play();
         setTimeout(function(){
             feedbackAlert.textContent = ""
@@ -125,16 +121,43 @@ function buttonsEventList(event) {
     } else {
         // If incorrect, subtract 5 seconds from the timer and display a wrong answer message
         timeLeft -= 5;
-        feedbackEl.textContent = "Your answer is wrong!";
+        feedbackEl.textContent = "wrong!";
         incorrectAudio.play();
         setTimeout(function(){
-            feedbackEl.textContent = ""
+            feedbackAlert.textContent = ""
             moveToNextQuestion();
         }, 1000)
         // clearTimeout(choiceTimeout)
     }  
 }
 
+function buttonsEventList(event) {
+    // Log the text content of the clicked button to the console
+    let selectedChoice = event.target.textContent;
+    // Get the current question object based on the current index (i)
+    let currentQuestion = quizQuestions[questionNumber];
+    // Check if the selected choice matches the correct answer for the current question
+    if (selectedChoice === currentQuestion.answer) {
+      // If correct, display a correct answer message in the feedback alert
+      feedbackAlert.textContent = "Your answer is correct!";
+      correctAudio.play();
+      setTimeout(function () {
+        feedbackAlert.textContent = "";
+        moveToNextQuestion();
+      }, 1000);
+      // clearTimeout(choiceTimeout)
+    } else {
+      // If incorrect, subtract 5 seconds from the timer and display a wrong answer message
+      timeLeft -= 5;
+      feedbackAlert.textContent = "Your answer is wrong!";
+      incorrectAudio.play();
+      setTimeout(function () {
+        feedbackAlert.textContent = "";
+        moveToNextQuestion();
+      }, 1000);
+      // clearTimeout(choiceTimeout)
+    }
+  }
 // Move to the next question or end the quiz if all questions are answered
 function moveToNextQuestion() {
     // Check if there are more questions
