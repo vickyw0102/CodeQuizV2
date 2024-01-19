@@ -147,7 +147,7 @@
         if (endQuiz) {
         finalScore.textContent = timeLeft;
         }
-    }
+    };
     
     // Create eventListener for submit button on the end-screen
     // Select button element from end-screen and store it in a variable
@@ -159,6 +159,7 @@
         let initials = document.querySelector("#initials").value;
 
         finalScore.textContent = timeLeft;
+
         highscores = { initials: initials, score: timeLeft };
         let highScoresLocStor = JSON.parse(localStorage.getItem("highscores"));
         if (highScoresLocStor === null) {
