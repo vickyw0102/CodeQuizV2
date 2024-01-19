@@ -7,7 +7,7 @@ const quizQuestions = [
     {
         "question-title":"The condition in an if /else statement is enclosed within _____.",
         "choices": ["1. quotes","2. curly brackets","3. parentheses","4. square brackets"],
-        "answer" : "3. curly brackets",
+        "answer" : "2. curly brackets",
     },
     {
         "question-title":"Arrays in JavaScript can be used to store _______",
